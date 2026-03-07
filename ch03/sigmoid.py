@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 
 # ブロードキャストにより配列の要素ごとに計算が行われる
+# sigmoidは（softmaxとは異なり）入力の配列の形によらず、各要素に対して独立な演算なので下記で任意の入力に対応できる。
 def sigmoid(x):
 
     return 1 / (1 + np.exp(-x))
