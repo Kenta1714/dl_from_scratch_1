@@ -36,6 +36,7 @@ for i in tqdm(range(iters_sum)):
     # 勾配の計算
     grad = network.numerical_gradient(x_batch, t_batch)
 
+    # gradはパラ名をキー、その勾配をvalueとした辞書なので、for文で各パラの勾配にアクセスし更新
     for key in ("W1", "W2", "b1", "b2"):
         network.params[key] -= learning_rate * grad[key]
 
