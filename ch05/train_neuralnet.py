@@ -23,7 +23,7 @@ learning_rate = 0.1
 train_loss_list = []
 train_acc_list = []
 test_acc_list = []
-# 1エポック当たりの繰り返し数
+# ミニバッチを何回繰り返したら1エポックになるか
 iter_per_epoch = max(train_size / batch_size, 1)  # 今回ならtrain6万件より600になる
 
 network = TwoLayerNet(input_size=784, hidden_size=50, output_size=10)

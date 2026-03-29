@@ -29,8 +29,8 @@ class MultiLayerNet:
         self.input_size=input_size
         self.output_size=output_size
         # 層ごとに異なるhidden_sizeを持てるようにリスト形式で渡す
-        self.hidden_size_list=self.hidden_size_list
-        self.hidden_layer_num=len(self.hidden_size_list)
+        self.hidden_size_list=hidden_size_list
+        self.hidden_layer_num=len(hidden_size_list)
         self.weight_decay_lambda =weight_decay_lambda
         self.params={}
         
@@ -115,7 +115,7 @@ class MultiLayerNet:
             # 層ごとに0.5*lambdaをかけているが、ループ後にまとめてかけても同じ。ただし、層ごとにlambdaを変えるなどの拡張がしやすい形。
             weight_decay+=0.5*self.weight_decay_lambda*np.sum(W**2) # 単純に0.5*lambda*L2ノルムを計算しているだけ。
         # softmaxwithlossまで計算
-        return self.lastLayer.forward(y, t)+weight_decay
+        return self.last_layer.forward(y, t)+weight_decay
     
     # twolayernetと同じ。
     def accuracy(self, x, t):
@@ -171,7 +171,7 @@ class MultiLayerNet:
 
         # backward
         dout = 1
-        dout = self.lastLayer.backward(dout)
+        dout = self.last_layer.backward(dout)
 
         layers = list(self.layers.values())
         layers.reverse()

@@ -115,4 +115,5 @@ class TwoLayerNet:
         grads["W1"], grads["b1"] = self.layers["Affine1"].dW, self.layers["Affine1"].db
         grads["W2"], grads["b2"] = self.layers["Affine2"].dW, self.layers["Affine2"].db
 
+        # 現在の勾配を格納する辞書を返す
         return grads

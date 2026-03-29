@@ -122,7 +122,7 @@ class SoftmaxWithLoss:
         else:
             dx = self.y.copy()
             # バッチの各行について、正解のindexのみ1を引く
-            dx[np.arrange(batch_size), self.t] -= 1
+            dx[np.arange(batch_size), self.t] -= 1
             dx = dx / batch_size
         return dx
     
