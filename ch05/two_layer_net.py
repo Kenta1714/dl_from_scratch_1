@@ -8,7 +8,7 @@ from ch03.sigmoid import sigmoid
 from ch04.loss_function import cross_entropy_error
 from ch04.gradient import numerical_gradient
 
-from ch05.layers import Relu, Affine, SoftmaxWithLoss
+from common.layers import Relu, Affine, SoftmaxWithLoss
 
 from collections import (
     OrderedDict,
