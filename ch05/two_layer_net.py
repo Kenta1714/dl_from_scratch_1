@@ -32,7 +32,7 @@ class TwoLayerNet:
         self.layers["Relu1"] = Relu()
         self.layers["Affine2"] = Affine(self.params["W2"], self.params["b2"])
 
-        self.lastLayer = SoftmaxWithLoss()
+        self.last_layer = SoftmaxWithLoss()
 
     def predict(self, x):
 
@@ -49,7 +49,7 @@ class TwoLayerNet:
         # softmaxwithlossの手前までを計算
         y = self.predict(x)
         # softmaxwithlossまで計算
-        return self.lastLayer.forward(y, t)
+        return self.last_layer.forward(y, t)
 
     def accuracy(self, x, t):
         y = self.predict(x)
@@ -75,11 +75,12 @@ class TwoLayerNet:
             return self.loss(x, t)
 
         grads = {}
-        # self.numerical_gradientではないので、再帰ではなく単に外部関数のnumerical_gradientを呼び出しているだけ。
+        # self.numerical_gradientではないので、再帰ではなく単に別モジュールにある外部関数のnumerical_gradientを呼び出しているだけ。
 
         # 例えば下記の時、self.params["W1"]は配列そのものを指していることに注意。
         # つまり外部関数のx[idx] = tmp_val + hはself.params['W1'][idx] = tmp_val + hと同じ。
-        # よってその直後のf(x)は、すでにW1のある要素が微小変化した状態のfがつかわれる。
+        # よってその直後のf(x)は、すでにW1のある要素が微小変化した状態のNNがつかわれる。
+        # （ただしNNは重みを引数として受け取るf(x)のような関数ではないため、loss_Wの中では微小変化した引数を使うのではなく、すでに内部の重みが微小変化したNNを呼び出すような形になっている。）
 
         # lossの中のpredictはself.params["W1"]などを使用して出力を計算するが、このself.params["W1"]は外部関数の引数としても渡されており微小変化させられている。
         grads["W1"] = numerical_gradient(loss_W, self.params["W1"])
@@ -101,7 +102,7 @@ class TwoLayerNet:
 
         # backward
         dout = 1
-        dout = self.lastLayer.backward(dout)
+        dout = self.last_layer.backward(dout)
 
         layers = list(self.layers.values())
         layers.reverse()

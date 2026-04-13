@@ -269,32 +269,33 @@ class Convolution:
         FN, C, FH, FW = self.W.shape
         # 入力データは4次元テンソル
         N, C, H, W = x.shape
-        out_h = 1 + int((H + 2 * self.pad) / self.stride)
-        out_w = 1 + int((W + 2 * self.pad) / self.stride)
+        out_h = int((H + 2 * self.pad - FH) / self.stride) + 1
+        out_w = int((W + 2 * self.pad - FW) / self.stride) + 1
 
         # 入力側の一回のフィルター適用要素が一行となっている配列を作成
         col = im2col(x, FH, FW, self.stride, self.pad)
-        # 各列が一つのフィルタとなっている配列を作成
+
+        # 各列が一つのフィルタとなっている配列col_Wを作成
         # フィルターの個数行ある配列にしてから、転置してそれらを列にする。
 
         # 基本的にshapeの一番左がFN（つまりフィルタ数がFN）なので、メモリに並んでいるものについて、先頭からW/FN件ずつ取ってきたい。
         # reshap(FN,-1)だと一行にW/FN個ずつ並べるのでそれができる
         # reshape(-1,FN)にしてしまうと、例えば2かけ2のチャネル数1のフィルターが2個あったとして合計8個の要素が4行2列の配列に変形される
         # そうすると、先頭から2個ずつ区切って置かれることになるので、8/2=4ずつ取ることができない
-        out_w = self.W.reshape(FN, -1).T
+        col_W = self.W.reshape(FN, -1).T
 
-        out = np.dot(col, self.col_W) + self.b
+        out = np.dot(col, col_W) + self.b
         out = out.reshape(N, out_h, out_w, -1).transpose(0, 3, 1, 2)
 
         self.x = x
         self.col = col
-        self.col_W = self.col_W
+        self.col_W = col_W
 
         return out
 
     def backward(self, dout):
         FN, C, FH, FW = self.W.shape
-        dout = dout.ranspose(0, 2, 3, 1).reshape(-1, FN)
+        dout = dout.transpose(0, 2, 3, 1).reshape(-1, FN)
 
         # affineと同じ
         self.db = np.sum(dout, axis=0)
@@ -309,6 +310,7 @@ class Convolution:
         return dx
 
 
+# TODO 特にbackwardがよくわからないので復習する
 class Pooling:
     def __init__(self, pool_h, pool_w, stride=2, pad=0):
 
@@ -348,13 +350,14 @@ class Pooling:
 
         return out
 
+    # reluの実装で使用したmaxの逆伝播が参考になるらしい
     def backward(self, dout):
         dout = dout.transpose(0, 2, 3, 1)
 
         pool_size = self.pool_h * self.pool_w
         dmax = np.zeros((dout.size, pool_size))
         dmax[np.arange(self.arg_max.size), self.arg_max.flatten()] = dout.flatten()
-        dmax = dmax.reshape(doute.shape + (pool_size,))
+        dmax = dmax.reshape(dout.shape + (pool_size,))
 
         dcol = dmax.reshape(dmax.shape[0] * dmax.shape[1] * dmax.shape[2], -1)
         dx = col2im(dcol, self.x.shape, self.pool_h, self.pool_w, self.stride, self.pad)
